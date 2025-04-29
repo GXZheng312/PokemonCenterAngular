@@ -3,19 +3,21 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
 import { CommonModule } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { Router, RouterLink } from '@angular/router';
 
 
 @Component({
   selector: 'feature-register',
-  imports: [ReactiveFormsModule, CommonModule],
+  imports: [ReactiveFormsModule, CommonModule, RouterLink],
   templateUrl: './register.component.html',
   styleUrl: './register.component.css'
 })
 export class RegisterComponent {
   authService = inject(AuthService);
   fb = inject(FormBuilder);
+  router = inject(Router);
 
-  registerForm = this.fb.group({
+  registerForm = this.fb.nonNullable.group({
     username: ['', Validators.required],
     email: ['', [Validators.required, Validators.email]],
     password: ['', Validators.required],
@@ -33,7 +35,18 @@ export class RegisterComponent {
   passwordMatch = computed(() => this.password() === this.confirmPassword());
 
   onSubmit() {
-    console.log(this.registerForm.getRawValue());
+    const rawForm = this.registerForm.getRawValue();
+
+    this.authService
+      .register(rawForm.email, rawForm.username, rawForm.password)
+      .subscribe({
+        next: () => {
+          this.router.navigate(['/']);
+        },
+        error: (error) => {
+          console.error('Error registering user:', error);
+        }
+      })
   }
 }
 
