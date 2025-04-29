@@ -35,4 +35,15 @@ export class LoginComponent {
         }
       });
   }
+
+  loginWithGoogle() {
+    this.authService.loginWithGoogle().subscribe({
+      next: () => {
+        this.router.navigate(['/']);
+      },
+      error: (error) => {
+        console.error('Google login error:', error);
+      }
+    });
+  }
 }
